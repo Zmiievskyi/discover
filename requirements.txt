@@ -1,0 +1,13 @@
+# Web scraping and crawling dependencies
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# HTML parsing
+html5lib>=1.1
+
+# Tavily API client (for crawl.py)
+tavily-python>=0.3.0
+
+# Vector database for AI semantic search (optional, for local-crawl.py)
+chromadb>=0.4.0

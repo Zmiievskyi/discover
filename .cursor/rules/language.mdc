@@ -1,0 +1,11 @@
+---
+description: English-Only Code
+globs:
+alwaysApply: true
+---
+Regardless of conversation language:
+- All code, variables, functions in English
+- All comments and docstrings in English
+- Documentation and README files in English
+- Git commit messages in English
+- Only UI text can be in other languages when required

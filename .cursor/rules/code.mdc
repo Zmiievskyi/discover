@@ -1,0 +1,33 @@
+---
+description: Code Quality & Best Practices
+alwaysApply: true
+---
+Always follow software engineering best practices:
+- Keep files under 200 lines (split into modules if larger)
+  File length best practices:
+    - Target: 100-200 lines per file
+    - Maximum: 300 lines (split if larger)
+    - Minimum: 50 lines (merge if smaller)
+    - Exceptions:
+      * Config files can be longer
+      * Test files can reach 400 lines
+      * Simple interfaces/types can be < 50 lines
+    - When approaching 250 lines, consider refactoring
+    - Split by functionality, not arbitrary line count
+- Single Responsibility Principle: one class/function = one purpose
+- DRY (Don't Repeat Yourself): extract repeated code into functions
+- SOLID principles for object-oriented code
+- Clear, descriptive naming (variables, functions, classes)
+- Proper error handling and validation
+- Write testable, modular code
+
+For all Python projects:
+- Always create virtual environment first: `python -m venv venv`
+- Activate before any Python operations:
+  * macOS/Linux: `source venv/bin/activate`
+- Install all dependencies in venv: `pip install -r requirements.txt`
+- Create requirements.txt for all projects
+- Never use global pip install
+- Include venv/ in .gitignore
+- Start every Python session with: "First, activate your virtual environment"
+- If user forgets venv, remind: "Don't forget to activate venv first!"
