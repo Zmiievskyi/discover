@@ -6,7 +6,8 @@ A modular web crawler with SQLite persistence, stealth mode, and authentication 
 
 from .crawler import WebCrawler
 from .database import CrawlDatabase
+from .vector_store import VectorStore
 from . import config
 
-__version__ = '1.0.0'
-__all__ = ['WebCrawler', 'CrawlDatabase', 'config']
+__version__ = '1.1.0'
+__all__ = ['WebCrawler', 'CrawlDatabase', 'VectorStore', 'config']

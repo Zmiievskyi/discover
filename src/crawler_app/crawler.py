@@ -103,6 +103,26 @@ class WebCrawler:
             self.session.cookies.update(auth['cookies'])
             print("✓ Cookies added")
 
+        elif auth_type == 'auto_cookies':
+            # Auto-refresh cookie authentication
+            # Store login credentials for automatic refresh
+            self.login_url = auth['login_url']
+            self.login_username = auth['username']
+            self.login_password = auth['password']
+            self.login_username_field = auth['username_field']
+            self.login_password_field = auth['password_field']
+
+            # Use initial cookies if provided
+            if auth.get('initial_cookies'):
+                self.session.cookies.update(auth['initial_cookies'])
+                print("✓ Auto-refresh cookies configured (using initial cookies)")
+            else:
+                # Perform initial login
+                if self._login():
+                    print("✓ Auto-refresh cookies configured (logged in successfully)")
+                else:
+                    print("⚠️  Initial login failed - will retry on first request")
+
         elif auth_type == 'headers':
             # Header-based authentication (e.g., Bearer token)
             self.session.headers.update(auth['headers'])
@@ -117,6 +137,76 @@ class WebCrawler:
             return random.uniform(min_delay, max_delay)
         else:
             return self.delay
+
+    def _login(self):
+        """
+        Perform login to get fresh cookies.
+        Returns True on success, False on failure.
+        """
+        if not hasattr(self, 'login_url'):
+            return False
+
+        try:
+            print(f"🔐 Logging in to {self.login_url}...")
+
+            # Prepare login data
+            login_data = {
+                self.login_username_field: self.login_username,
+                self.login_password_field: self.login_password
+            }
+
+            # Send login request
+            response = self.session.post(
+                self.login_url,
+                data=login_data,
+                timeout=10,
+                allow_redirects=True
+            )
+
+            # Check if login was successful
+            # Most sites return 200 or 302/303 redirect on success
+            if response.status_code in [200, 302, 303]:
+                # Check if we got cookies
+                if len(self.session.cookies) > 0:
+                    print(f"✓ Login successful! Got {len(self.session.cookies)} cookies")
+                    return True
+                else:
+                    print("⚠️  Login returned success but no cookies received")
+                    return False
+            else:
+                print(f"✗ Login failed with status code {response.status_code}")
+                return False
+
+        except Exception as e:
+            print(f"✗ Login error: {str(e)}")
+            return False
+
+    def _is_auth_expired(self, response):
+        """
+        Check if authentication has expired based on response.
+
+        Args:
+            response: requests.Response object
+
+        Returns:
+            bool: True if auth expired, False otherwise
+        """
+        # Common indicators of expired authentication:
+        # - 401 Unauthorized
+        # - 403 Forbidden (sometimes used for expired sessions)
+        # - Redirect to login page
+        if response.status_code in [401, 403]:
+            return True
+
+        # Check if redirected to login page (common pattern)
+        if hasattr(self, 'login_url'):
+            # If we were redirected and the URL contains login-related keywords
+            if response.url != response.request.url:
+                login_keywords = ['login', 'signin', 'auth', 'authenticate']
+                if any(keyword in response.url.lower() for keyword in login_keywords):
+                    return True
+
+        return False
 
     def is_valid_url(self, url):
         """Check if URL is valid and belongs to same domain"""
@@ -155,11 +245,34 @@ class WebCrawler:
 
         return links
 
-    def crawl_page(self, url):
-        """Crawl a single page"""
+    def crawl_page(self, url, retry_count=0):
+        """
+        Crawl a single page with automatic cookie refresh on auth failure.
+
+        Args:
+            url: URL to crawl
+            retry_count: Internal counter to prevent infinite retry loops
+
+        Returns:
+            bool: True on success, False on failure
+        """
         try:
             print(f"Processing: {url}")
             response = self.session.get(url, timeout=10)
+
+            # Check if authentication has expired
+            if self._is_auth_expired(response) and retry_count == 0:
+                print(f"⚠️  Authentication expired for {url}")
+
+                # Try to refresh cookies by logging in again
+                if hasattr(self, 'login_url') and self._login():
+                    print(f"🔄 Retrying {url} with fresh cookies...")
+                    # Retry the request once with new cookies
+                    return self.crawl_page(url, retry_count=1)
+                else:
+                    print(f"✗ Could not refresh authentication")
+                    return False
+
             response.raise_for_status()
 
             soup = BeautifulSoup(response.content, 'html.parser')

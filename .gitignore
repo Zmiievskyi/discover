@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+venv_tavily/
+env/
+ENV/
+
+# Environment variables (IMPORTANT: Never commit API keys!)
+.env
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Vector database
+chroma_db/
+
+# Crawler output
+crawl_results.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

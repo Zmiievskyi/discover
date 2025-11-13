@@ -1,190 +1,134 @@
-# Web Crawler с AI-поиском
+# Web Crawler with AI Semantic Search
 
-Мощный веб-краулер с поддержкой авторизации, стелс-режима и AI-поиска.
+Modern web crawler with **ChromaDB + OpenAI embeddings** for powerful semantic search.
 
-## Возможности
 
-- ✅ **Рекурсивный краулинг** - автоматический обход всех страниц сайта
-- 🔐 **Авторизация** - поддержка cookies, Basic Auth, Bearer tokens
-- 🥷 **Стелс-режим** - случайные задержки, реалистичные User-Agent
-- 💾 **SQLite база** - хранение всех данных с метаданными
-- 🧠 **ChromaDB** - AI-поиск по смыслу (семантический поиск)
-- ♾️ **Без ограничений** - опция краулинга всех доступных страниц
 
-## Установка
+## ✨ Features
+
+- 🕷️ **Advanced web crawler** - Stealth mode, authentication, domain-restricted crawling
+- 🤖 **AI-powered semantic search** - OpenAI embeddings (`text-embedding-3-small`)
+- 🗄️ **ChromaDB vector store** - Persistent storage for embeddings
+- 🌍 **Multilingual** - Search in any language
+- 🔒 **Security-first** - All secrets in `.env`, never in git
+- 📦 **Modular** - Clean, testable, reusable components
+
+## 🚀 Quick Start
+
+### 1. Setup
 
 ```bash
-# Создайте виртуальное окружение
-python -m venv venv_tavily
-source venv_tavily/bin/activate  # На Windows: venv_tavily\Scripts\activate
+# Activate virtual environment
+source venv/bin/activate
 
-# Установите зависимости
+# Install dependencies
 pip install -r requirements.txt
+
+# Configure (copy template and edit)
+cp .env.example .env
+nano .env  # Add your OPENAI_API_KEY
 ```
 
-## Быстрый старт
-
-### 1. Краулинг с cookies (для защищенных сайтов)
-
-```python
-from local_crawl import WebCrawler
-
-# Настройте cookies из браузера
-auth_config = {
-    'type': 'cookies',
-    'cookies': {
-        'JSESSIONID': 'ВАШ_JSESSIONID',
-        'session_token': 'ВАШ_ТОКЕН'
-    }
-}
-
-crawler = WebCrawler(
-    base_url="https://example.com/",
-    max_pages=None,  # Без ограничений
-    delay=2,
-    stealth_mode=True,
-    auth=auth_config,
-    use_database=True,
-    use_chromadb=True  # Включить AI-поиск
-)
-
-try:
-    results = crawler.crawl()
-finally:
-    crawler.close()
-```
-
-### 2. AI-поиск по скравленным данным
+### 2. Crawl
 
 ```bash
-python search_example.py
+python main.py
 ```
 
-Или программно:
+Crawls `BASE_URL` (from `.env`), generates embeddings, stores in ChromaDB.
 
-```python
-# Поиск по смыслу на любом языке
-results = crawler.search("как настроить VPN", n_results=5)
+### 3. Search
 
-for page in results:
-    print(f"{page['title']}: {page['url']}")
-```
-
-## Архитектура хранения
-
-### SQLite (crawl_data.db)
-Традиционная база для всех данных:
-- URL, заголовок, полный текст
-- Метаданные (дата, размер, количество ссылок)
-- Быстрый поиск по URL
-
-### ChromaDB (./chroma_db/)
-Векторная база для AI-поиска:
-- Автоматические embeddings (векторы смысла)
-- Семантический поиск
-- Понимает синонимы и контекст
-
-## Примеры запросов AI-поиска
-
-```python
-# Русский язык
-crawler.search("документация по безопасности")
-crawler.search("как увеличить продажи")
-
-# English
-crawler.search("VPN configuration guide")
-crawler.search("marketing strategies")
-
-# Работает даже если точных слов нет в тексте!
-# Запрос: "продвижение товара"
-# Найдет: страницы про "маркетинг", "рекламу", "sales"
-```
-
-## Конфигурация
-
-### Параметры WebCrawler
-
-| Параметр | Описание | По умолчанию |
-|----------|----------|--------------|
-| `base_url` | Начальный URL | - |
-| `max_pages` | Лимит страниц (None = без ограничений) | 100 |
-| `delay` | Задержка между запросами (сек) | 1 |
-| `stealth_mode` | Случайные задержки + реалистичные заголовки | False |
-| `auth` | Конфигурация авторизации | None |
-| `use_database` | Включить SQLite | True |
-| `use_chromadb` | Включить AI-поиск | False |
-
-### Типы авторизации
-
-```python
-# Cookies (рекомендуется для Confluence, Jira и т.д.)
-auth_config = {
-    'type': 'cookies',
-    'cookies': {'session_id': 'value'}
-}
-
-# HTTP Basic Auth
-auth_config = {
-    'type': 'basic',
-    'username': 'user',
-    'password': 'pass'
-}
-
-# Bearer Token
-auth_config = {
-    'type': 'headers',
-    'headers': {'Authorization': 'Bearer TOKEN'}
-}
-```
-
-## Как получить cookies из браузера
-
-1. Откройте сайт в браузере и авторизуйтесь
-2. Нажмите F12 (DevTools)
-3. Перейдите в **Application** → **Cookies**
-4. Скопируйте нужные cookies (обычно JSESSIONID, session, token)
-5. Вставьте в `auth_config`
-
-## Статистика и мониторинг
-
-После краулинга показывается:
-```
-📊 Статистика SQLite:
-  Всего страниц: 156
-  Всего символов: 2,543,891
-  Первый краулинг: 2025-10-24 10:30:15
-  Последний краулинг: 2025-10-24 11:45:32
-
-🧠 Статистика ChromaDB:
-  Всего embeddings: 156
-```
-
-## Файлы проекта
-
-- `local-crawl.py` - Основной краулер
-- `search_example.py` - Пример AI-поиска
-- `crawl.py` - Tavily API краулер
-- `crawl_data.db` - SQLite база данных
-- `chroma_db/` - ChromaDB данные
-- `crawl_results.json` - JSON экспорт результатов
-
-## Troubleshooting
-
-### ChromaDB не установлен
 ```bash
-pip install chromadb
+# Interactive mode
+python search.py
+
+# Single query
+python search.py "find about security"
+python search.py "security best practices"
 ```
 
-### Cookies не работают
-- Убедитесь что cookies актуальны (не истекли)
-- Проверьте что скопировали все нужные cookies
-- Некоторые сайты требуют несколько cookies одновременно
+## ⚙️ Configuration (`.env` file)
 
-### Краулер находит мало страниц
-- Проверьте что авторизация работает
-- Увеличьте `max_pages` или установите `None`
-- Проверьте что сайт не блокирует краулинг
+```bash
+# Required
+OPENAI_API_KEY=sk-your-key-here
+BASE_URL=https://your-site.com/
 
-## Лицензия
+# Optional
+MAX_PAGES=50
+STEALTH_MODE=true
 
-MIT
+# Authentication (if needed)
+AUTH_TYPE=cookies
+AUTH_COOKIES=JSESSIONID=abc;token=xyz
+```
+
+See `.env.example` for all options.
+
+## 📁 Structure
+
+```
+src/crawler_app/
+├── crawler.py       # Web crawler
+├── database.py      # SQLite (optional)
+├── vector_store.py  # ChromaDB + OpenAI
+└── config.py        # Config loader
+
+main.py              # Crawl & index
+search.py            # Semantic search
+.env                 # Your config
+```
+
+## 💰 Cost
+
+- **$0.02 per 1M tokens** (OpenAI text-embedding-3-small)
+- 50 pages ≈ **$0.001** (less than 1 cent!)
+
+## 🔧 Advanced
+
+### Authentication
+
+**Cookies:**
+```bash
+AUTH_TYPE=cookies
+AUTH_COOKIES=KEY1=VAL1;KEY2=VAL2
+```
+
+**Basic Auth:**
+```bash
+AUTH_TYPE=basic
+AUTH_USERNAME=user
+AUTH_PASSWORD=pass
+```
+
+### Change Model
+
+```bash
+# Fast & cheap (default)
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+
+# Better quality
+OPENAI_EMBEDDING_MODEL=text-embedding-3-large
+```
+
+## 📚 Use Cases
+
+- Documentation search
+- Multilingual queries
+- Concept-based search (meaning, not keywords)
+- RAG with LLMs
+
+## 🛡️ Security
+
+- ✅ Secrets in `.env`
+- ✅ `.env` in `.gitignore`
+- ❌ **Never commit `.env`!**
+
+## 📖 Full Documentation
+
+See [CLAUDE.md](./CLAUDE.md) for detailed architecture and development guide.
+
+---
+
+Built using ChromaDB, OpenAI, and Python

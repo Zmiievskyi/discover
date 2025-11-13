@@ -3,7 +3,7 @@ Main entry point for web crawler application.
 Orchestrates crawler, database, and configuration.
 """
 
-from src.crawler_app import WebCrawler, CrawlDatabase, config
+from src.crawler_app import WebCrawler, CrawlDatabase, VectorStore, config
 
 
 def main():
@@ -43,6 +43,37 @@ def main():
     # print(f"  Total pages: {stats['total_pages']}")
     # print(f"  Total characters: {stats['total_characters']}")
     # db.close()
+
+    # Save to ChromaDB vector store for semantic search
+    if config.VECTOR_STORE_ENABLED:
+        print("\n" + "=" * 80)
+        print("SAVING TO VECTOR STORE (ChromaDB)")
+        print("=" * 80)
+
+        vector_store = VectorStore(
+            persist_directory=config.VECTOR_STORE_PATH,
+            collection_name=config.VECTOR_COLLECTION_NAME,
+            embedding_model=config.OPENAI_EMBEDDING_MODEL
+        )
+
+        # Convert results to format for batch insertion
+        pages_to_add = [
+            {
+                'url': result['url'],
+                'title': result['title'],
+                'content': result['text']
+            }
+            for result in results
+        ]
+
+        vector_store.add_pages_batch(pages_to_add)
+
+        vs_stats = vector_store.get_statistics()
+        print(f"\nVector store statistics:")
+        print(f"  Total documents: {vs_stats['total_documents']}")
+        print(f"  Collection: {vs_stats['collection_name']}")
+        print(f"  Path: {vs_stats['persist_directory']}")
+        print("\n✓ Use 'python search.py' for semantic search")
 
     # Display sample results
     print("\nSample crawled pages:")

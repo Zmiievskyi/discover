@@ -9,5 +9,7 @@ html5lib>=1.1
 # Tavily API client (for crawl.py)
 tavily-python>=0.3.0
 
-# Vector database for AI semantic search (optional, for local-crawl.py)
+# Vector database for AI semantic search
 chromadb>=0.4.0
+openai>=1.0.0  # For OpenAI embeddings API (text-embedding-3-small)
+python-dotenv>=1.0.0  # For .env file support (API keys)
