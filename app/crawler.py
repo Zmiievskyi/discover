@@ -141,6 +141,7 @@ class WebCrawler:
     def _login(self):
         """
         Perform login to get fresh cookies.
+        For Confluence/Atlassian sites, this fetches CSRF token first.
         Returns True on success, False on failure.
         """
         if not hasattr(self, 'login_url'):
@@ -149,16 +150,49 @@ class WebCrawler:
         try:
             print(f"🔐 Logging in to {self.login_url}...")
 
-            # Prepare login data
+            # Step 1: GET login page to fetch CSRF token and establish session
+            get_response = self.session.get(
+                self.login_url,
+                timeout=10,
+                allow_redirects=True
+            )
+
+            # Extract CSRF token from HTML (Confluence uses atl_token or csrf_token)
+            csrf_token = None
+            try:
+                soup = BeautifulSoup(get_response.text, 'html.parser')
+                # Try common CSRF token field names
+                for field_name in ['atl_token', 'csrf_token', '_csrf', 'authenticity_token']:
+                    csrf_field = soup.find('input', {'name': field_name})
+                    if csrf_field and csrf_field.get('value'):
+                        csrf_token = csrf_field.get('value')
+                        print(f"  Found CSRF token: {field_name}")
+                        break
+            except Exception as e:
+                print(f"  ⚠️  Could not parse CSRF token: {e}")
+
+            # Step 2: Prepare login data
             login_data = {
                 self.login_username_field: self.login_username,
                 self.login_password_field: self.login_password
             }
 
-            # Send login request
+            # Add CSRF token if found
+            if csrf_token:
+                # Try different CSRF field names (depends on Confluence version)
+                login_data['atl_token'] = csrf_token
+
+            # Step 3: Send login POST request with proper headers
+            login_headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Referer': self.login_url,
+                'Origin': f"{urlparse(self.login_url).scheme}://{urlparse(self.login_url).netloc}"
+            }
+
             response = self.session.post(
                 self.login_url,
                 data=login_data,
+                headers=login_headers,
                 timeout=10,
                 allow_redirects=True
             )
@@ -169,12 +203,17 @@ class WebCrawler:
                 # Check if we got cookies
                 if len(self.session.cookies) > 0:
                     print(f"✓ Login successful! Got {len(self.session.cookies)} cookies")
+                    # Print cookie names (not values for security)
+                    cookie_names = ', '.join(self.session.cookies.keys())
+                    print(f"  Cookies: {cookie_names}")
                     return True
                 else:
                     print("⚠️  Login returned success but no cookies received")
                     return False
             else:
                 print(f"✗ Login failed with status code {response.status_code}")
+                # Print response snippet for debugging
+                print(f"  Response preview: {response.text[:200]}")
                 return False
 
         except Exception as e:

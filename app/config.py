@@ -7,7 +7,8 @@ import os
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
-load_dotenv()
+# Use override=True to ensure .env values take precedence over shell environment
+load_dotenv(override=True)
 
 
 def get_bool(env_var: str, default: bool = False) -> bool:

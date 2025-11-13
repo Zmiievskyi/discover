@@ -119,6 +119,41 @@ OPENAI_EMBEDDING_MODEL=text-embedding-3-large
 - Concept-based search (meaning, not keywords)
 - RAG with LLMs
 
+## ✅ What This Crawler Is Good For
+
+This is a **static HTML crawler** - perfect for:
+
+- ✅ **Static websites** - Traditional HTML sites with `<a href>` links
+- ✅ **Server-rendered content** - Sites that return full HTML (e.g., WordPress, Confluence, wikis)
+- ✅ **Documentation sites** - ReadTheDocs, GitBook, static generators (Jekyll, Hugo)
+- ✅ **Blogs and CMS** - Traditional content management systems
+- ✅ **Internal wikis** - Confluence, MediaWiki, DokuWiki (with authentication)
+
+**Examples that work well:**
+- `https://docs.python.org/`
+- `https://wiki.yourcompany.com/` (Confluence)
+- Traditional blogs and news sites
+
+## ❌ What This Crawler Does NOT Support
+
+This crawler **cannot handle**:
+
+- ❌ **JavaScript SPAs** (Single Page Applications) - React, Vue, Angular apps
+- ❌ **Dynamic content loaded via AJAX** - Content loaded after page render
+- ❌ **Client-side routing** - Apps that change content without page reload
+- ❌ **API-only endpoints** - REST/GraphQL APIs (no HTML)
+- ❌ **Infinite scroll** - Content that loads as you scroll
+
+**Examples that won't work:**
+- Modern portals (e.g., `portal.gcore.com` - SPA)
+- Gmail, Google Drive, Slack web apps
+- Twitter/X, Facebook (JavaScript-heavy)
+
+**Alternative solutions for SPAs:**
+- Use **Selenium** or **Playwright** for JavaScript execution
+- Access the **REST API** directly (if available)
+- Use specialized tools like Puppeteer, Scrapy with Splash
+
 ## 🛡️ Security
 
 - ✅ Secrets in `.env`

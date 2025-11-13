@@ -4,10 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Python-based web crawling project with AI-powered semantic search:
+This is a Python-based **static HTML web crawler** with AI-powered semantic search:
 1. **app/** - Modular web crawler with SQLite persistence, ChromaDB vector store, stealth mode, and authentication support
 2. **main.py** - Entry point for crawling and indexing
 3. **search.py** - Semantic search interface using ChromaDB and OpenAI embeddings
+
+### ⚠️ Important: What This Crawler Can and Cannot Do
+
+**✅ Works with (Static HTML sites):**
+- Server-rendered HTML (Confluence, WordPress, traditional wikis)
+- Documentation sites (ReadTheDocs, GitBook, static generators)
+- Traditional blogs and CMS platforms
+- Any site with `<a href>` links in the HTML source
+
+**❌ Does NOT work with (JavaScript SPAs):**
+- Single Page Applications (React, Vue, Angular)
+- Dynamic content loaded via AJAX/fetch
+- Client-side routing (URLs that don't trigger page reload)
+- Modern portals like `portal.gcore.com` (requires Selenium/Playwright)
+
+**Why?** This crawler uses `requests` + `BeautifulSoup` which only read static HTML - they don't execute JavaScript. For SPA sites, use Selenium, Playwright, or access the REST API directly.
 
 ## Folder Structure
 
