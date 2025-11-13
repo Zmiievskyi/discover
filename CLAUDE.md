@@ -5,10 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 This is a Python-based web crawling project with AI-powered semantic search:
-1. **crawl.py** - Simple Tavily API client for web crawling
-2. **src/crawler_app/** - Modular web crawler with SQLite persistence, ChromaDB vector store, stealth mode, and authentication support
-3. **search.py** - Semantic search interface using ChromaDB and sentence-transformers
-4. **legacy/local-crawl.py** - Original monolithic version (423 lines, kept for reference)
+1. **src/crawler_app/** - Modular web crawler with SQLite persistence, ChromaDB vector store, stealth mode, and authentication support
+2. **main.py** - Entry point for crawling and indexing
+3. **search.py** - Semantic search interface using ChromaDB and OpenAI embeddings
 
 ## Folder Structure
 
@@ -24,7 +23,6 @@ discover/
 
 ├── main.py                    # Entry point (~100 lines) - Crawl & index
 ├── search.py                  # Semantic search script (~100 lines) - AI search interface
-├── crawl.py                   # Simple Tavily API crawler
 ├── requirements.txt           # Python dependencies (ChromaDB, OpenAI, etc.)
 ├── .env.example               # Configuration template (copy to .env)
 ├── .env                       # Your actual configuration (NOT in git!)
@@ -60,17 +58,9 @@ Never run Python commands without activating the virtual environment first.
 
 **All configuration is now in `.env` file** - no hardcoded settings in code!
 
-## Running the Crawlers
+## Running the Crawler
 
-### Simple API Crawler
-```bash
-python crawl.py
-```
-- Uses API for web crawling
-- Configured for `https://paris-brest.be`
-- Requires Tavily API key (currently embedded in code)
-
-### Advanced Local Crawler (Modular Version)
+### Web Crawler
 ```bash
 python main.py
 ```
@@ -347,13 +337,13 @@ config.print_config()  # Shows all current settings
 - ✅ **`.gitignore` configured** - `.env` file will never be committed to git
 - ✅ **`.env.example` provided** - Template with no real credentials
 - ✅ **No hardcoded secrets** - All configuration loaded from environment variables
-- ⚠️  `crawl.py` still contains embedded Tavily API key - TODO: move to `.env`
 - **CRITICAL**: Never commit `.env` file or share it publicly!
 - **IMPORTANT**: Rotate API keys if accidentally exposed
 
 ### Translation Status
-- ✓ All new modules in `src/crawler_app/` use English
-- Original `legacy/local-crawl.py` still has Russian comments (kept as reference)
+- ✓ All modules in `src/crawler_app/` use English
+- ✓ All documentation is in English
+- ✓ All code comments and docstrings are in English
 
 ### Development Approach
 - Act as a mentor: explain WHY, point out learning opportunities
@@ -431,7 +421,7 @@ See **Configuration via .env File** section above for all available options.
 ### Example Usage
 ```bash
 # 1. Activate venv (CRITICAL!)
-source venv_tavily/bin/activate
+source venv/bin/activate
 
 # 2. Install dependencies (first time only)
 pip install -r requirements.txt
