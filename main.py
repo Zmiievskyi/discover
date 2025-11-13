@@ -3,7 +3,7 @@ Main entry point for web crawler application.
 Orchestrates crawler, database, and configuration.
 """
 
-from src.crawler_app import WebCrawler, CrawlDatabase, VectorStore, config
+from app import WebCrawler, CrawlDatabase, VectorStore, config
 
 
 def main():

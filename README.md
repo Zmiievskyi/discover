@@ -69,15 +69,15 @@ See `.env.example` for all options.
 ## 📁 Structure
 
 ```
-src/crawler_app/
-├── crawler.py       # Web crawler
-├── database.py      # SQLite (optional)
-├── vector_store.py  # ChromaDB + OpenAI
-└── config.py        # Config loader
-
-main.py              # Crawl & index
-search.py            # Semantic search
-.env                 # Your config
+discover/
+├── app/
+│   ├── crawler.py       # Web crawler
+│   ├── database.py      # SQLite (optional)
+│   ├── vector_store.py  # ChromaDB + OpenAI
+│   └── config.py        # Config loader
+├── main.py              # Crawl & index
+├── search.py            # Semantic search
+└── .env                 # Your config (NOT in git)
 ```
 
 ## 💰 Cost

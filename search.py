@@ -3,7 +3,7 @@ Semantic search script using ChromaDB vector store.
 Demonstrates AI-powered search capabilities with natural language queries.
 """
 
-from src.crawler_app import VectorStore, config
+from app import VectorStore, config
 import sys
 
 

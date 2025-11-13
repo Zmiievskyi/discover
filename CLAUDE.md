@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 This is a Python-based web crawling project with AI-powered semantic search:
-1. **src/crawler_app/** - Modular web crawler with SQLite persistence, ChromaDB vector store, stealth mode, and authentication support
+1. **app/** - Modular web crawler with SQLite persistence, ChromaDB vector store, stealth mode, and authentication support
 2. **main.py** - Entry point for crawling and indexing
 3. **search.py** - Semantic search interface using ChromaDB and OpenAI embeddings
 
@@ -13,25 +13,23 @@ This is a Python-based web crawling project with AI-powered semantic search:
 
 ```
 discover/
-├── src/
-│   └── crawler_app/          # Main crawler package
-│       ├── __init__.py        # Package initialization, exports WebCrawler, CrawlDatabase, VectorStore
-│       ├── database.py        # CrawlDatabase class (~150 lines) - SQLite storage
-│       ├── crawler.py         # WebCrawler class (~250 lines) - Main crawler
-│       ├── vector_store.py    # VectorStore class (~280 lines) - ChromaDB + OpenAI embeddings
-│       └── config.py          # Configuration loader (~180 lines) - Reads from .env
-
-├── main.py                    # Entry point (~100 lines) - Crawl & index
-├── search.py                  # Semantic search script (~100 lines) - AI search interface
-├── requirements.txt           # Python dependencies (ChromaDB, OpenAI, etc.)
-├── .env.example               # Configuration template (copy to .env)
-├── .env                       # Your actual configuration (NOT in git!)
-├── .gitignore                 # Git ignore rules (excludes .env, *.db, chroma_db/)
-├── CLAUDE.md                  # This file
-├── venv/              # Virtual environment
-├── crawl_results.json        # Output from crawling (JSON)
-├── crawl_data.db             # SQLite database (optional)
-└── chroma_db/                # ChromaDB vector store (persisted)
+├── app/                      # Main crawler package
+│   ├── __init__.py           # Package initialization, exports WebCrawler, CrawlDatabase, VectorStore
+│   ├── database.py           # CrawlDatabase class (~150 lines) - SQLite storage
+│   ├── crawler.py            # WebCrawler class (~345 lines) - Main crawler
+│   ├── vector_store.py       # VectorStore class (~280 lines) - ChromaDB + OpenAI embeddings
+│   └── config.py             # Configuration loader (~215 lines) - Reads from .env
+├── main.py                   # Entry point (~90 lines) - Crawl & index
+├── search.py                 # Semantic search script (~110 lines) - AI search interface
+├── requirements.txt          # Python dependencies (ChromaDB, OpenAI, etc.)
+├── .env.example              # Configuration template (copy to .env)
+├── .env                      # Your actual configuration (NOT in git!)
+├── .gitignore                # Git ignore rules (excludes .env, *.db, chroma_db/)
+├── CLAUDE.md                 # This file
+├── venv       /              # Virtual environment
+├── crawl_results.json        # Output from crawling (JSON, gitignored)
+├── crawl_data.db             # SQLite database (optional, gitignored)
+└── chroma_db/                # ChromaDB vector store (persisted, gitignored)
 ```
 
 ## Python Environment Setup
@@ -40,6 +38,7 @@ discover/
 
 ```bash
 # Activate virtual environment (MUST do this first!)
+python3 -m venv venv
 source venv/bin/activate
 
 # Install dependencies
@@ -76,7 +75,7 @@ python main.py
   - Automatic embedding generation using OpenAI API (`text-embedding-3-small`)
 
 
-### Semantic Search (NEW!)
+### Semantic Search 
 ```bash
 # Interactive search mode
 python search.py
@@ -96,7 +95,7 @@ python search.py "security best practices"
 
 ### Modular Structure 
 
-**src/crawler_app/database.py** (~150 lines):
+**app/database.py** (~150 lines):
 - `CrawlDatabase` class: SQLite database wrapper for storing crawled pages
 - Key methods:
   - `_create_tables()`: Creates pages table with indexes
@@ -106,7 +105,7 @@ python search.py "security best practices"
   - `search_pages()`: Full-text search in titles/content
   - `get_statistics()`: Database stats (total pages, characters, date range)
 
-**src/crawler_app/crawler.py** (~320 lines):
+**app/crawler.py** (~345 lines):
 - `WebCrawler` class: Main crawler implementation with session management and auto-refresh authentication
 - Key methods:
   - `_setup_stealth_mode()`: Configures realistic browser headers, random User-Agent rotation
@@ -120,7 +119,7 @@ python search.py "security best practices"
   - `crawl()`: Main loop with visited URL tracking and delay management
   - `save_results()`: Export to JSON
 
-**src/crawler_app/config.py** (~200 lines):
+**app/config.py** (~215 lines):
 - Configuration settings module that reads ALL settings from `.env` file
 - No hardcoded values - everything configurable via environment variables
 - Key features:
@@ -137,7 +136,7 @@ python search.py "security best practices"
   - `OPENAI_EMBEDDING_MODEL`: OpenAI embedding model
   - `AUTH_CONFIG`: Built from `AUTH_TYPE`, `AUTH_COOKIES`, `AUTH_USERNAME`, `AUTH_LOGIN_URL`, etc.
 
-**src/crawler_app/vector_store.py** (~280 lines):
+**app/vector_store.py** (~280 lines):
 - `VectorStore` class: ChromaDB wrapper for semantic search with OpenAI embeddings
 - Key features:
   - Automatic embedding generation using OpenAI API
@@ -155,21 +154,21 @@ python search.py "security best practices"
 - Default model: `text-embedding-3-small` (1536-dim, $0.02/1M tokens, fast and cost-effective)
 - Alternative models available: `text-embedding-3-large` (3072-dim, $0.13/1M tokens, better quality)
 
-**src/crawler_app/__init__.py**:
+**app/__init__.py**:
 - Package initialization file
 - Exports `WebCrawler`, `CrawlDatabase`, `VectorStore`, and `config` for easy importing
 - Defines package version (v1.1.0)
 
-**main.py** (~100 lines):
+**main.py** (~90 lines):
 - Entry point that orchestrates all components
-- Imports from `src.crawler_app` package
+- Imports from `app` package
 - Creates crawler instance with config settings
 - Runs crawl and saves results to JSON
 - Automatically saves to ChromaDB vector store (if enabled)
 - Optionally saves to SQLite database (commented out by default)
 - Displays sample results and statistics
 
-**search.py** (~100 lines):
+**search.py** (~110 lines):
 - Semantic search interface for querying ChromaDB
 - Two modes:
   - Interactive: Continuous search queries
@@ -181,11 +180,11 @@ python search.py "security best practices"
 - **Single Responsibility**: Each module has one clear purpose
 - **File Length**: All files under 350 lines (well within best practices)
   - database.py: ~150 lines
-  - crawler.py: ~320 lines (with auto-refresh authentication)
+  - crawler.py: ~345 lines (with auto-refresh authentication)
   - vector_store.py: ~280 lines (with OpenAI API integration)
-  - config.py: ~200 lines (environment variable loader with validation and auto_cookies support)
-  - main.py: ~100 lines
-  - search.py: ~100 lines
+  - config.py: ~215 lines (environment variable loader with validation and auto_cookies support)
+  - main.py: ~90 lines
+  - search.py: ~110 lines
 - **Maintainability**: Easy to modify configuration without touching code (just edit `.env`)
 - **Security**: All secrets in `.env` file, never committed to git
 - **Testability**: Each module can be tested independently
@@ -310,18 +309,16 @@ The `config.py` module automatically validates settings when imported:
 
 To debug configuration, use:
 ```python
-from src.crawler_app import config
+from app import config
 config.print_config()  # Shows all current settings
 ```
 
 ## Code Quality Rules
 
 - **File length**: Keep files 100-200 lines (max 300)
-  - ✓ New modular structure follows this rule
-  - Original `legacy/local-crawl.py` (423 lines) kept for reference
+  - ✓ Modular structure follows this rule (all files < 350 lines)
 - **Folder Organization**: Use proper package structure
-  - ✓ Code organized in `src/crawler_app/` package
-  - ✓ Legacy code in `legacy/` folder
+  - ✓ Code organized in `app/` package (clean, simple structure)
 - **All code in English only**: Code, comments, docstrings must be in English
   - ✓ All new modules use English
   - Original file had Russian comments (now fixed in new modules)
@@ -341,7 +338,7 @@ config.print_config()  # Shows all current settings
 - **IMPORTANT**: Rotate API keys if accidentally exposed
 
 ### Translation Status
-- ✓ All modules in `src/crawler_app/` use English
+- ✓ All modules in `app/` use English
 - ✓ All documentation is in English
 - ✓ All code comments and docstrings are in English
 
